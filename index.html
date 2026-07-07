@@ -56,6 +56,18 @@
       display: block;
     }
 
+    #starCanvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+      display: block;
+      mix-blend-mode: screen;
+      opacity: 0.55;
+    }
+
     /* ══════════════════════════════════════════
        OPENING OVERLAY
     ══════════════════════════════════════════ */
@@ -151,13 +163,25 @@
     .envelope-scene {
       position:relative; width:360px; height:220px;
       z-index:10; perspective:1000px;
+      margin-top:160px;
       animation:float-env 3.8s ease-in-out infinite;
     }
     .envelope-scene.card-out { animation:none; }
     @keyframes float-env { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-14px);} }
     .env-body {
-      position:absolute; inset:0; background:#e8d5c4;
-      box-shadow:0 8px 36px rgba(44,31,31,0.22),0 2px 8px rgba(44,31,31,0.1); z-index:2;
+      position:absolute; inset:0;
+      background-color:#c9a090;
+      /* paper texture via SVG noise filter */
+      background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E"),
+        linear-gradient(160deg, #d4aa98 0%, #c49080 50%, #b88070 100%);
+      box-shadow:
+        0 12px 40px rgba(44,20,12,0.35),
+        0 4px 12px rgba(44,20,12,0.2),
+        0 1px 3px rgba(44,20,12,0.15),
+        inset 0 1px 0 rgba(255,220,200,0.25),
+        inset 0 -1px 0 rgba(0,0,0,0.1);
+      z-index:2;
     }
     .env-tri { position:absolute; width:0; height:0; }
     .env-tri--left  { top:0;left:0;z-index:3; border-top:110px solid transparent; border-bottom:110px solid transparent; border-left:180px solid #d4b89e; }
@@ -205,6 +229,8 @@
       width:308px; opacity:0; z-index:4;
       transition: box-shadow 0.75s;
       pointer-events:none;
+      --card-lift-peak: -185px;
+      --card-lift: -148px;
     }
     .envelope-scene.card-out .letter-card {
       animation: card-emerge 0.9s cubic-bezier(0.22,1,0.36,1) forwards;
@@ -212,13 +238,20 @@
     }
     @keyframes card-emerge {
       0%   { transform:translateX(-50%) translateY(0)     scale(0.9);  opacity:0; }
-      55%  { transform:translateX(-50%) translateY(-185px) scale(1.03); opacity:1; }
-      100% { transform:translateX(-50%) translateY(-148px) scale(1);   opacity:1; }
+      55%  { transform:translateX(-50%) translateY(var(--card-lift-peak)) scale(1.03); opacity:1; }
+      100% { transform:translateX(-50%) translateY(var(--card-lift)) scale(1);   opacity:1; }
     }
     .letter-card-inner {
-      background:#fdf8f2; border-radius:6px; padding:2.2rem 1.75rem 2rem; text-align:center;
-      box-shadow:0 4px 20px rgba(44,31,31,0.14),inset 0 0 0 1px rgba(200,168,112,0.22);
-      background-image:repeating-linear-gradient(transparent 0 27px,rgba(200,168,112,0.1) 27px 28px);
+      background-color:#fdf8f2;
+      background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E"),
+        repeating-linear-gradient(transparent 0 27px,rgba(200,168,112,0.1) 27px 28px);
+      border-radius:6px; padding:2.2rem 1.75rem 2rem; text-align:center;
+      box-shadow:
+        0 8px 28px rgba(44,31,31,0.2),
+        0 2px 6px rgba(44,31,31,0.1),
+        inset 0 0 0 1px rgba(200,168,112,0.22),
+        inset 0 1px 0 rgba(255,255,255,0.8);
     }
     .letter-card-inner::before {
       content:''; display:block; width:60px; height:1px;
@@ -663,6 +696,32 @@
       font-style:italic; font-size:0.82rem;
       color:rgba(253,246,237,0.55); margin-top:0.15rem;
     }
+    .maps-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.7rem;
+      padding: 0.5rem 1.1rem;
+      background: transparent;
+      border: 1px solid var(--gold-dim);
+      border-radius: 6px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.92rem;
+      letter-spacing: 0.04em;
+      color: var(--gold);
+      text-decoration: none;
+      transition: background 0.3s, border-color 0.3s, color 0.3s;
+    }
+    .maps-btn::before {
+      content: '↗';
+      font-size: 0.85rem;
+      opacity: 0.7;
+    }
+    .maps-btn:hover {
+      background: rgba(200,168,112,0.12);
+      border-color: var(--gold);
+      color: #e2c48a;
+    }
     .event-divider {
       width:100%; height:1px;
       background:linear-gradient(90deg,transparent,rgba(200,168,112,0.25),transparent);
@@ -902,7 +961,11 @@
     /* ══════════════════════════════════════════
        RESPONSIVE
     ══════════════════════════════════════════ */
+    @media (max-height:700px) {
+      .letter-card { --card-lift-peak: -110px; --card-lift: -80px; }
+    }
     @media (max-width:480px) {
+      .letter-card { --card-lift-peak: -125px; --card-lift: -95px; }
       .envelope-scene { width:300px; height:183px; }
       .env-tri--left,.env-tri--right { border-top-width:92px; border-bottom-width:92px; }
       .env-tri--left  { border-left-width:150px; }
@@ -924,6 +987,7 @@
 
 <!-- ══ GLOBAL OCEAN CANVAS (fixed, behind everything, drives whole-page mood) ══ -->
 <canvas id="oceanCanvas"></canvas>
+<canvas id="starCanvas"></canvas>
 
 <!-- ══ SCROLL PROGRESS BAR ══ -->
 <div id="scrollProgress"></div>
@@ -970,7 +1034,7 @@
 </div>
 
 <!-- ── AMBIENT OCEAN AUDIO ── -->
-<audio id="oceanAudio" src="ocean-ambience.mp3" loop preload="auto"></audio>
+<audio id="oceanAudio" src="music.mp3" loop preload="auto"></audio>
 <button class="audio-toggle" id="audioToggle" type="button" aria-label="Mute/unmute music">
   <div class="vinyl-label">
     <svg class="icon-speaker" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -1009,7 +1073,7 @@
 
     <div class="hero-scroll-cue">
       <div class="hero-scroll-line"></div>
-      <span class="hero-scroll-label">Scroll untuk melaut</span>
+      <span class="hero-scroll-label">Scroll ke bawah untuk melaut</span>
     </div>
   </section>
 
@@ -1178,6 +1242,9 @@
             <div class="event-row-label">Lokasi</div>
             <div class="event-row-value">Gedung Cirebon Indah</div>
             <div class="event-row-sub">Jl. Siliwangi No. 1, Cirebon, Jawa Barat</div>
+            <a class="maps-btn" href="https://www.google.com/maps/search/?api=1&query=Gedung+Cirebon+Indah+Jl+Siliwangi+No+1+Cirebon" target="_blank" rel="noopener">
+              Buka di Google Maps
+            </a>
           </div>
         </div>
         <div class="event-divider"></div>
@@ -1209,9 +1276,9 @@
       <input class="rsvp-input" id="rsvpName" type="text" placeholder="Nama Anda" />
       <div class="rsvp-row">
         <select class="rsvp-input" id="rsvpAttend" style="font-family:'Cormorant Garamond',serif;">
-          <option value="">Kehadiran</option>
-          <option value="Hadir">✓ Hadir dengan senang hati</option>
-          <option value="Tidak Hadir">✗ Mohon maaf, berhalangan</option>
+          <option value="">Hadir?</option>
+          <option value="Hadir">✓ Hadir</option>
+          <option value="Tidak Hadir">✗ Berhalangan</option>
         </select>
         <input class="rsvp-input" id="rsvpGuests" type="number" min="1" max="10" value="1" placeholder="Jml. Tamu" />
       </div>
@@ -1273,8 +1340,8 @@
    dashboard → Project Settings → API → "anon public").
    Never paste the service_role key here.
 ══════════════════════════════════════════════ */
-const SUPABASE_URL      = 'https://vaqyikmkvzczuntpmrpg.supabase.co';
-const SUPABASE_ANON_KEY = 'PASTE_YOUR_SUPABASE_ANON_PUBLIC_KEY_HERE';
+const SUPABASE_URL      = 'https://dqqgmwgxdqlmxdvyiijx.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRxcWdtd2d4ZHFsbXhkdnlpaWp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0MTQ3NjcsImV4cCI6MjA5ODk5MDc2N30.nxGDPLY4tlfmU66xNAEQ104CWKbtemLohyyE12V31oc';
 
 function escapeHtml(str){
   const div = document.createElement('div');
@@ -1360,7 +1427,8 @@ if(rsvpBtn){
       nameEl.value = ''; guestsEl.value = '1'; attendEl.value = ''; messageEl.value = '';
       loadWishes();
     }catch(e){
-      status.textContent = 'Maaf, gagal mengirim. Coba lagi ya.';
+      console.error('RSVP error:', e.message);
+      status.textContent = 'Maaf, gagal mengirim. Coba lagi ya. ('+e.message+')';
       status.className = 'rsvp-status error';
     }finally{
       rsvpBtn.disabled = false;
@@ -1507,11 +1575,22 @@ const oceanCvs = document.getElementById('oceanCanvas');
 const ctx = oceanCvs.getContext('2d');
 let W, H, horizonY, oceanH;
 
+let cachedTimeKey = null;
+let skyGrad, glowGrad, sunGrad, hazeGrad, vignetteGrad, cachedSunX, cachedSunY;
+
+function rebuildVignette(){
+  vignetteGrad = ctx.createRadialGradient(W/2,H*0.55,H*0.25,W/2,H*0.55,H*0.9);
+  vignetteGrad.addColorStop(0,'rgba(0,0,0,0)');
+  vignetteGrad.addColorStop(1,'rgba(0,0,8,0.32)');
+}
+
 function resizeOcean(){
   W = oceanCvs.width  = window.innerWidth;
   H = oceanCvs.height = window.innerHeight;
   horizonY = H * 0.42;
   oceanH   = H - horizonY;
+  cachedTimeKey = null;
+  rebuildVignette();
 }
 window.addEventListener('resize', resizeOcean);
 resizeOcean();
@@ -1575,18 +1654,53 @@ function updateMoodUI(){
 }
 updateScrollProgress();
 
+const isMobile = window.innerWidth <= 700 || /Mobi|Android|iPhone/i.test(navigator.userAgent);
+const WAVE_NUM   = isMobile ? 13 : 22;
+const WAVE_STEP  = isMobile ? 11 : 6;
+const FOAM_STEP  = isMobile ? 16 : 9;
+const GLITTER_N  = isMobile ? 80 : 170;
+
 function drawOcean(){
-  T += 0.016;
+  T += 0.038;
   const P = getPalette(timeOfDay);
   const sunX = W*0.68;
   const sunY = horizonY - P.sunH * horizonY * 0.82;
 
+  /* Rebuild palette-dependent gradients only when timeOfDay actually
+     changes (i.e. while scrolling) — most of the time the visitor is
+     just reading, so this skips ~5 gradient rebuilds per frame. */
+  const timeKey = Math.round(timeOfDay*400);
+  if(timeKey !== cachedTimeKey || !vignetteGrad){
+    cachedTimeKey = timeKey;
+    cachedSunX = sunX; cachedSunY = sunY;
+
+    skyGrad = ctx.createLinearGradient(0,0,0,horizonY+oceanH*0.1);
+    skyGrad.addColorStop(0, rgb(P.skyTop));
+    skyGrad.addColorStop(0.7, rgb(lerpRGB(P.skyTop,P.skyHor,0.55)));
+    skyGrad.addColorStop(1, rgb(P.skyHor));
+
+    const gR=Math.min(W,H)*0.5;
+    glowGrad=ctx.createRadialGradient(sunX,sunY,0,sunX,sunY,gR);
+    glowGrad.addColorStop(0,rgb(P.glow,0.55));
+    glowGrad.addColorStop(0.25,rgb(P.glow,0.22));
+    glowGrad.addColorStop(1,rgb(P.glow,0));
+
+    const sR=Math.min(W,H)*0.045;
+    sunGrad=ctx.createRadialGradient(sunX,sunY,0,sunX,sunY,sR);
+    sunGrad.addColorStop(0,rgb(P.sun,1));
+    sunGrad.addColorStop(0.7,rgb(P.sun,0.95));
+    sunGrad.addColorStop(1,rgb(P.sun,0.2));
+
+    hazeGrad=ctx.createLinearGradient(0,horizonY-40,0,horizonY+40);
+    hazeGrad.addColorStop(0,rgb(P.skyHor,0));
+    hazeGrad.addColorStop(0.5,rgb(P.skyHor,0.4));
+    hazeGrad.addColorStop(1,rgb(P.wFar,0));
+
+    if(!vignetteGrad) rebuildVignette();
+  }
+
   /* sky */
-  const sky = ctx.createLinearGradient(0,0,0,horizonY+oceanH*0.1);
-  sky.addColorStop(0, rgb(P.skyTop));
-  sky.addColorStop(0.7, rgb(lerpRGB(P.skyTop,P.skyHor,0.55)));
-  sky.addColorStop(1, rgb(P.skyHor));
-  ctx.fillStyle = sky;
+  ctx.fillStyle = skyGrad;
   ctx.fillRect(0,0,W,horizonY+2);
 
   /* stars (appear at dusk/night) */
@@ -1601,41 +1715,28 @@ function drawOcean(){
   }
 
   /* sun/moon glow */
-  const gR=Math.min(W,H)*0.5;
-  const g=ctx.createRadialGradient(sunX,sunY,0,sunX,sunY,gR);
-  g.addColorStop(0,rgb(P.glow,0.55));
-  g.addColorStop(0.25,rgb(P.glow,0.22));
-  g.addColorStop(1,rgb(P.glow,0));
-  ctx.fillStyle=g; ctx.fillRect(0,0,W,horizonY+oceanH*0.4);
+  ctx.fillStyle=glowGrad; ctx.fillRect(0,0,W,horizonY+oceanH*0.4);
 
   /* sun/moon disc */
   const sR=Math.min(W,H)*0.045;
-  const sd=ctx.createRadialGradient(sunX,sunY,0,sunX,sunY,sR);
-  sd.addColorStop(0,rgb(P.sun,1));
-  sd.addColorStop(0.7,rgb(P.sun,0.95));
-  sd.addColorStop(1,rgb(P.sun,0.2));
-  ctx.fillStyle=sd; ctx.beginPath(); ctx.arc(sunX,sunY,sR,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle=sunGrad; ctx.beginPath(); ctx.arc(cachedSunX,cachedSunY,sR,0,Math.PI*2); ctx.fill();
 
   /* haze at horizon */
-  const haze=ctx.createLinearGradient(0,horizonY-40,0,horizonY+40);
-  haze.addColorStop(0,rgb(P.skyHor,0));
-  haze.addColorStop(0.5,rgb(P.skyHor,0.4));
-  haze.addColorStop(1,rgb(P.wFar,0));
-  ctx.fillStyle=haze; ctx.fillRect(0,horizonY-40,W,80);
+  ctx.fillStyle=hazeGrad; ctx.fillRect(0,horizonY-40,W,80);
 
   /* ocean waves, back to front */
-  const NUM=22;
+  const NUM=WAVE_NUM;
   for(let i=0;i<NUM;i++){
     const depth=i/(NUM-1);
     const yTop=horizonY+Math.pow(depth,1.9)*oceanH;
     const amp=lerp(0.6,28,depth);
     const wlen=lerp(46,320,depth);
-    const speed=lerp(0.25,0.9,depth);
+    const speed=lerp(0.6,2.2,depth);
     const phase=T*speed+i*0.9;
     const col=lerpRGB(P.wFar,P.wNear,depth);
     ctx.beginPath();
     ctx.moveTo(0,H); ctx.lineTo(0,yTop+Math.sin(phase)*amp);
-    for(let x=0;x<=W;x+=6){
+    for(let x=0;x<=W;x+=WAVE_STEP){
       const y=yTop+Math.sin(x/wlen+phase)*amp+Math.sin(x/(wlen*0.4)+phase*1.6)*amp*0.3;
       ctx.lineTo(x,y);
     }
@@ -1645,7 +1746,7 @@ function drawOcean(){
     /* crest highlight */
     ctx.lineWidth=lerp(0.6,2.2,depth);
     ctx.beginPath(); let started=false;
-    for(let x=0;x<=W;x+=6){
+    for(let x=0;x<=W;x+=WAVE_STEP){
       const y=yTop+Math.sin(x/wlen+phase)*amp+Math.sin(x/(wlen*0.4)+phase*1.6)*amp*0.3;
       started?ctx.lineTo(x,y):(ctx.moveTo(x,y),started=true);
     }
@@ -1655,7 +1756,7 @@ function drawOcean(){
     /* foam on front swells */
     if(depth>0.62){
       const fA=(depth-0.62)/0.38;
-      for(let x=0;x<=W;x+=9){
+      for(let x=0;x<=W;x+=FOAM_STEP){
         const y=yTop+Math.sin(x/wlen+phase)*amp+Math.sin(x/(wlen*0.4)+phase*1.6)*amp*0.3;
         const crest=Math.sin(x/wlen+phase);
         if(crest>0.55&&Math.random()>0.45){
@@ -1667,12 +1768,12 @@ function drawOcean(){
   }
 
   /* sun glitter path on water */
-  for(let i=0;i<170;i++){
+  for(let i=0;i<GLITTER_N;i++){
     const dy=Math.random();
     const y=horizonY+Math.pow(dy,1.5)*oceanH;
     const spread=lerp(6,W*0.28,dy);
-    const x=sunX+(Math.random()-0.5)*2*spread;
-    const distFade=1-Math.min(1,Math.abs(x-sunX)/(spread+1));
+    const x=cachedSunX+(Math.random()-0.5)*2*spread;
+    const distFade=1-Math.min(1,Math.abs(x-cachedSunX)/(spread+1));
     const flick=0.25+Math.random()*0.75;
     const a=distFade*distFade*flick*P.glit*(1-dy*0.25);
     if(a<0.02) continue;
@@ -1682,14 +1783,86 @@ function drawOcean(){
   }
 
   /* vignette */
-  const vig=ctx.createRadialGradient(W/2,H*0.55,H*0.25,W/2,H*0.55,H*0.9);
-  vig.addColorStop(0,'rgba(0,0,0,0)');
-  vig.addColorStop(1,'rgba(0,0,8,0.32)');
-  ctx.fillStyle=vig; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle=vignetteGrad; ctx.fillRect(0,0,W,H);
 
   requestAnimationFrame(drawOcean);
 }
 drawOcean();
+
+/* ══════════════════════════════════════════════
+   STAR PARTICLE SYSTEM (orbital, sparse, blended over ocean)
+══════════════════════════════════════════════ */
+(function(){
+  const sc   = document.getElementById('starCanvas');
+  const sCtx = sc.getContext('2d');
+  let SW = sc.width  = window.innerWidth;
+  let SH = sc.height = window.innerHeight;
+  window.addEventListener('resize', ()=>{
+    SW = sc.width  = window.innerWidth;
+    SH = sc.height = window.innerHeight;
+  });
+
+  const HUE      = 217;
+  const MAX_STARS = 280;
+  const stars    = [];
+
+  /* pre-render glow sprite into offscreen canvas */
+  const sprite  = document.createElement('canvas');
+  sprite.width  = 40;
+  sprite.height = 40;
+  const sCtx2   = sprite.getContext('2d');
+  const half    = sprite.width / 2;
+  const grad    = sCtx2.createRadialGradient(half,half,0,half,half,half);
+  grad.addColorStop(0.025, '#fff');
+  grad.addColorStop(0.1,   `hsl(${HUE},61%,55%)`);
+  grad.addColorStop(0.25,  `hsl(${HUE},64%,20%)`);
+  grad.addColorStop(1,     'transparent');
+  sCtx2.fillStyle = grad;
+  sCtx2.beginPath();
+  sCtx2.arc(half,half,half,0,Math.PI*2);
+  sCtx2.fill();
+
+  function rnd(min,max){
+    if(arguments.length<2){ max=min; min=0; }
+    if(min>max){ let t=max; max=min; min=t; }
+    return Math.floor(Math.random()*(max-min+1))+min;
+  }
+  function maxOrbit(x,y){
+    const m=Math.max(x,y);
+    return Math.round(Math.sqrt(m*m+m*m))/2;
+  }
+
+  function Star(){
+    this.orbitR    = rnd(maxOrbit(SW,SH));
+    this.radius    = rnd(40, this.orbitR) / 14;
+    this.cx        = SW/2;
+    this.cy        = SH/2;
+    this.t         = rnd(0, MAX_STARS);
+    this.speed     = rnd(this.orbitR) / 70000;
+    this.alpha     = rnd(2,10)/10;
+  }
+  Star.prototype.draw = function(){
+    const x = Math.sin(this.t)*this.orbitR + this.cx;
+    const y = Math.cos(this.t)*this.orbitR + this.cy;
+    const tw = rnd(10);
+    if     (tw===1 && this.alpha>0.05) this.alpha -= 0.04;
+    else if(tw===2 && this.alpha<0.95) this.alpha += 0.04;
+    sCtx.globalAlpha = this.alpha;
+    sCtx.drawImage(sprite, x-this.radius/2, y-this.radius/2, this.radius, this.radius);
+    this.t += this.speed;
+  };
+
+  for(let i=0;i<MAX_STARS;i++) stars.push(new Star());
+
+  function animStars(){
+    /* fully clear each frame — no trail fill = no orbit rings visible */
+    sCtx.clearRect(0,0,SW,SH);
+    sCtx.globalCompositeOperation = 'lighter';
+    stars.forEach(s=>s.draw());
+    requestAnimationFrame(animStars);
+  }
+  animStars();
+})();
 
 /* ══════════════════════════════════════════════
    4. COUPLE CARD 3D TILT
