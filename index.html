@@ -29,8 +29,8 @@
       --wax-shine:   rgba(255,210,180,0.55);
 
       /* glass card tokens (text always readable over ocean) */
-      --glass-bg:      rgba(253,246,237,0.78);
-      --glass-bg-dark: rgba(20,14,12,0.62);
+      --glass-bg:      rgba(253,246,237,0.88);
+      --glass-bg-dark: rgba(20,14,12,0.82);
       --glass-border:  rgba(255,255,255,0.35);
     }
 
@@ -89,12 +89,6 @@
     }
     #opening.gone { display: none; }
 
-    #petalsCanvas {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
-    }
 
 
     /* ══════════════════════════════════════════
@@ -394,7 +388,7 @@
     }
     .hero-scroll-cue {
       position:absolute;
-      bottom:2.5rem; left:50%;
+      bottom:4.5rem; left:50%;
       transform:translateX(-50%);
       z-index:5;
       display:flex; flex-direction:row; align-items:center; gap:0.75rem;
@@ -402,7 +396,7 @@
     }
     .hero-scroll-line {
       width:32px; height:1px;
-      background: linear-gradient(to right,transparent,rgba(200,168,112,0.8));
+      background: linear-gradient(to right,transparent,rgba(232,200,122,0.9));
       animation: scroll-pulse 1.8s ease-in-out infinite;
     }
     @keyframes scroll-pulse {
@@ -411,8 +405,8 @@
     }
     .hero-scroll-label {
       font-family:'DM Mono',monospace;
-      font-size:0.5rem; letter-spacing:0.18em;
-      text-transform:uppercase; color:rgba(200,168,112,0.75);
+      font-size:0.72rem; letter-spacing:0.18em;
+      text-transform:uppercase; color:rgba(232,200,122,0.9);
       white-space:nowrap;
     }
 
@@ -449,14 +443,14 @@
     }
     .section-eyebrow {
       font-family:'DM Mono',monospace;
-      font-size:0.52rem; letter-spacing:0.38em;
+      font-size:0.68rem; letter-spacing:0.3em;
       text-transform:uppercase; color:var(--gold);
       margin-bottom:0.8rem;
       text-shadow: 0 2px 10px rgba(0,0,0,0.25);
     }
     .section-title {
       font-family:'Cormorant SC',Georgia,serif;
-      font-size: clamp(1.8rem,4vw,2.8rem);
+      font-size: clamp(2.2rem,5vw,3.2rem);
       font-weight:300; letter-spacing:0.1em;
       color:#fff; text-align:center;
       margin-bottom:0.5rem;
@@ -474,8 +468,8 @@
     ══════════════════════════════════════════ */
     .glass-card {
       background: var(--glass-bg);
-      backdrop-filter: blur(6px) saturate(120%);
-      -webkit-backdrop-filter: blur(6px) saturate(120%);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
       border-radius: 18px;
       box-shadow: 0 20px 60px rgba(0,0,0,0.25),
                   inset 0 0 0 1px var(--glass-border);
@@ -501,8 +495,8 @@
       box-shadow: 0 20px 50px rgba(0,0,0,0.3), 0 6px 16px rgba(0,0,0,0.18);
       transition: transform 0.5s cubic-bezier(0.6,0,0.2,1), box-shadow 0.5s;
       transform-style:preserve-3d;
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
     }
     .couple-card:hover {
       transform: translateY(-12px) rotate(-1deg);
@@ -555,7 +549,7 @@
       background: rgba(255,255,255,0.15);
       border:2px solid rgba(255,255,255,0.3);
       display:flex; align-items:center; justify-content:center;
-      backdrop-filter:blur(4px);
+      backdrop-filter:none;
     }
     .couple-card-portrait svg { width:48px; height:48px; opacity:0.5; }
 
@@ -1001,7 +995,6 @@
 </div>
 
 <!-- ══ PETAL CANVAS (opening screen only) ══ -->
-<canvas id="petalsCanvas"></canvas>
 
 <!-- ══════════════════════════════════════════════
      OPENING RITUAL
@@ -1333,185 +1326,9 @@
 </div><!-- /main-invitation -->
 
 <script>
-/* ══════════════════════════════════════════════
-   1. PETAL PARTICLE SYSTEM (opening screen only)
-══════════════════════════════════════════════ */
-/* ══════════════════════════════════════════════
-   0. SUPABASE — RSVP + WISHES
-   NOTE: paste your anon/public API key below (Supabase
-   dashboard → Project Settings → API → "anon public").
-   Never paste the service_role key here.
-══════════════════════════════════════════════ */
-const SUPABASE_URL      = 'https://dqqgmwgxdqlmxdvyiijx.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRxcWdtd2d4ZHFsbXhkdnlpaWp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0MTQ3NjcsImV4cCI6MjA5ODk5MDc2N30.nxGDPLY4tlfmU66xNAEQ104CWKbtemLohyyE12V31oc';
 
-function escapeHtml(str){
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
-}
-
-async function supabaseInsert(table, payload){
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
-    method: 'POST',
-    headers: {
-      'apikey': SUPABASE_ANON_KEY,
-      'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-      'Content-Type': 'application/json',
-      'Prefer': 'return=minimal'
-    },
-    body: JSON.stringify(payload)
-  });
-  if(!res.ok){ throw new Error(await res.text().catch(()=>res.statusText)); }
-}
-
-function renderWishes(items){
-  const list = document.getElementById('wishesList');
-  if(!list) return;
-  if(!items || !items.length){
-    list.innerHTML = '<p class="wishes-empty">Belum ada ucapan. Jadilah yang pertama menuliskan doa ✦</p>';
-    return;
-  }
-  list.innerHTML = items.map(w => `
-    <div class="wish-item">
-      <div class="wish-name">${escapeHtml(w.name)}</div>
-      <div class="wish-message">${escapeHtml(w.message)}</div>
-    </div>
-  `).join('');
-}
-
-async function loadWishes(){
-  const list = document.getElementById('wishesList');
-  if(!list) return;
-  try{
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/wishes?select=name,message,created_at&order=created_at.desc&limit=20`, {
-      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
-    });
-    if(!res.ok) throw new Error('fetch failed');
-    renderWishes(await res.json());
-  }catch(e){
-    list.innerHTML = '<p class="wishes-empty">Belum ada ucapan. Jadilah yang pertama menuliskan doa ✦</p>';
-  }
-}
-loadWishes();
-
-const rsvpBtn = document.getElementById('rsvpBtn');
-if(rsvpBtn){
-  rsvpBtn.addEventListener('click', async ()=>{
-    const nameEl    = document.getElementById('rsvpName');
-    const guestsEl  = document.getElementById('rsvpGuests');
-    const attendEl  = document.getElementById('rsvpAttend');
-    const messageEl = document.getElementById('rsvpMessage');
-    const status    = document.getElementById('rsvpStatus');
-
-    const name    = nameEl.value.trim();
-    const attend  = attendEl.value;
-    const guests  = Math.max(1, parseInt(guestsEl.value,10) || 1);
-    const message = messageEl.value.trim();
-
-    if(!name || !attend){
-      status.textContent = 'Mohon isi nama dan konfirmasi kehadiran.';
-      status.className = 'rsvp-status error';
-      return;
-    }
-
-    rsvpBtn.disabled = true;
-    rsvpBtn.textContent = 'Mengirim...';
-    status.textContent = '';
-    status.className = 'rsvp-status';
-
-    try{
-      await supabaseInsert('rsvp', { name, attend, guests });
-      if(message) await supabaseInsert('wishes', { name, message });
-
-      status.textContent = 'Terima kasih! Konfirmasi kamu sudah kami terima.';
-      status.className = 'rsvp-status success';
-      nameEl.value = ''; guestsEl.value = '1'; attendEl.value = ''; messageEl.value = '';
-      loadWishes();
-    }catch(e){
-      console.error('RSVP error:', e.message);
-      status.textContent = 'Maaf, gagal mengirim. Coba lagi ya. ('+e.message+')';
-      status.className = 'rsvp-status error';
-    }finally{
-      rsvpBtn.disabled = false;
-      rsvpBtn.textContent = 'Kirim Doa ✦';
-    }
-  });
-}
-
-document.querySelectorAll('.gift-copy-btn').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    const val = btn.getAttribute('data-copy');
-    const finish = () => {
-      const original = btn.textContent;
-      btn.textContent = 'Tersalin ✓';
-      setTimeout(()=>{ btn.textContent = original; }, 1500);
-    };
-    if(navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(val).then(finish).catch(finish);
-    } else {
-      const ta = document.createElement('textarea');
-      ta.value = val; document.body.appendChild(ta); ta.select();
-      try{ document.execCommand('copy'); }catch(e){}
-      document.body.removeChild(ta);
-      finish();
-    }
-  });
-});
-
-const petalsCvs = document.getElementById('petalsCanvas');
-const pCtx = petalsCvs.getContext('2d');
-let PW, PH;
-function resizePetals(){
-  PW = petalsCvs.width  = window.innerWidth;
-  PH = petalsCvs.height = window.innerHeight;
-}
-window.addEventListener('resize', resizePetals);
-resizePetals();
-
-const PCOLORS = ['#f2c4b8','#e8b4a8','#f5d5c8','#c8a870','#f9e4d8','#ecd5c5'];
-
-/* declare here so animPetals can reference them immediately */
 let isOpened    = false;
 let openingGone = false;
-class Petal {
-  constructor(){ this.reset(true); }
-  reset(init=false){
-    this.x = Math.random()*PW;
-    this.y = init?Math.random()*PH:-20;
-    this.r=2+Math.random()*4;
-    this.vx=(Math.random()-0.5)*0.35;
-    this.vy=0.25+Math.random()*0.55;
-    this.rot=Math.random()*Math.PI*2;
-    this.drot=(Math.random()-0.5)*0.02;
-    this.color=PCOLORS[Math.floor(Math.random()*PCOLORS.length)];
-    this.alpha=0.35+Math.random()*0.4;
-  }
-  update(){
-    this.x += this.vx + Math.sin(Date.now()*0.001+this.y*0.01)*0.3;
-    this.y += this.vy;
-    this.rot += this.drot;
-    if(this.y > PH+20) this.reset();
-  }
-  draw(){
-    pCtx.save();
-    pCtx.translate(this.x,this.y);
-    pCtx.rotate(this.rot);
-    pCtx.globalAlpha = this.alpha;
-    pCtx.fillStyle   = this.color;
-    pCtx.beginPath();
-    pCtx.ellipse(0,0,this.r,this.r*0.55,0,0,Math.PI*2);
-    pCtx.fill();
-    pCtx.restore();
-  }
-}
-const petals = Array.from({length:45},()=>new Petal());
-function animPetals(){
-  pCtx.clearRect(0,0,PW,PH);
-  petals.forEach(p=>{p.update();p.draw();});
-  if(!isOpened || !openingGone) requestAnimationFrame(animPetals);
-}
-animPetals();
 
 /* ══════════════════════════════════════════════
    2. ENVELOPE OPENING
@@ -1662,7 +1479,12 @@ const WAVE_STEP  = isMobile ? 11 : 6;
 const FOAM_STEP  = isMobile ? 16 : 9;
 const GLITTER_N  = isMobile ? 80 : 170;
 
-function drawOcean(){
+let lastOceanFrame = 0;
+const OCEAN_FPS = isMobile ? 30 : 60;
+function drawOcean(ts=0){
+  requestAnimationFrame(drawOcean);
+  if(ts - lastOceanFrame < 1000/OCEAN_FPS) return;
+  lastOceanFrame = ts;
   T += 0.038;
   const P = getPalette(timeOfDay);
   const sunX = W*0.68;
@@ -1787,7 +1609,7 @@ function drawOcean(){
   /* vignette */
   ctx.fillStyle=vignetteGrad; ctx.fillRect(0,0,W,H);
 
-  requestAnimationFrame(drawOcean);
+  // end drawOcean
 }
 drawOcean();
 
@@ -1805,8 +1627,10 @@ drawOcean();
   });
 
   const HUE      = 217;
-  const MAX_STARS = 280;
+  const MAX_STARS = isMobile ? 120 : 280;
   const stars    = [];
+  let lastStarFrame = 0;
+  const STAR_FPS = isMobile ? 30 : 60;
 
   /* pre-render glow sprite into offscreen canvas */
   const sprite  = document.createElement('canvas');
@@ -1856,14 +1680,16 @@ drawOcean();
 
   for(let i=0;i<MAX_STARS;i++) stars.push(new Star());
 
-  function animStars(){
+  function animStars(ts){
+    requestAnimationFrame(animStars);
+    if(ts - lastStarFrame < 1000/STAR_FPS) return;
+    lastStarFrame = ts;
     /* fully clear each frame — no trail fill = no orbit rings visible */
     sCtx.clearRect(0,0,SW,SH);
     sCtx.globalCompositeOperation = 'lighter';
     stars.forEach(s=>s.draw());
-    requestAnimationFrame(animStars);
   }
-  animStars();
+  animStars(0);
 })();
 
 /* ══════════════════════════════════════════════
